@@ -37,8 +37,8 @@ snap_url=https://search.apps.ubuntu.com/api/v1/package/${snap_name}
 pkg=snap2flatpak.snap
 
 if [[ ! -f "$pkg" ]]; then
-    pkg_url=$(curl "$snap_url" | jq -r .anon_download_url)
-    curl "$pkg_url" -o "$pkg"
+    pkg_url=$(curl -L "$snap_url" | jq -r .anon_download_url)
+    curl -L "$pkg_url" -o "$pkg"
 fi
 
 sqfs=squashfs-root
@@ -47,9 +47,10 @@ if [[ ! -d "$sqfs" ]]; then
     unsquashfs "$pkg"
     # dirty patch
     if [[ -f "$sqfs"/desktop-common.sh ]]; then
-        awk -v n=2 'NR==FNR{total=NR;next} FNR==total-n+1{exit} 1' "$sqfs"/desktop-common.sh > "$sqfs"/desktop-common.sh.tmp
+        head -n -2 "$sqfs"/desktop-common.sh > "$sqfs"/desktop-common.sh.tmp
         mv "$sqfs"/desktop-common.sh.tmp "$sqfs"/desktop-common.sh
         echo 'unset LIBGL_DRIVERS_PATH; unset LIBVA_DRIVERS_PATH; exec "$@"' >> "$sqfs"/desktop-common.sh
+        chmod +x "$sqfs"/desktop-common.sh
     fi
 fi
 if [[ ! -f "fs.tar" ]]; then
@@ -110,6 +111,7 @@ cat > "${appid}.json" <<EOF
         "--share=ipc",
         "--socket=pulseaudio",
         "--socket=x11",
+        "--device=dri",
         "--env=SNAP=/app/share",
         "--env=SNAP_ARCH=amd64"
     ],
