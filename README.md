@@ -1,4 +1,4 @@
-# snap2flatpack
+# snap2flatpak
 
 Convert Ubuntu snap applications to Flatpak.
 This tool downloads and decompresses the Snap's squashfs file and recompiles it into the Flatpak format.
@@ -20,5 +20,5 @@ You may need to customize the script.
 ```shell
 git clean -fdx
 ./convert.sh SNAP_APPNAME
-flatpak run com.snap2flatpack.SNAP_APPNAME
+flatpak run com.snap2flatpak.SNAP_APPNAME
 ```

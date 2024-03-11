@@ -101,9 +101,9 @@ cat > "${appid}.json" <<EOF
 {
     "app-id" : "${appid}",
     "base": "org.electronjs.Electron2.BaseApp",
-    "base-version": "22.08",
+    "base-version": "23.08",
     "runtime": "org.freedesktop.Platform",
-    "runtime-version": "22.08",
+    "runtime-version": "23.08",
     "sdk": "org.freedesktop.Sdk",
     "command" : "snap2flatpak.sh",
     "finish-args" : [
