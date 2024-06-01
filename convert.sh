@@ -34,6 +34,8 @@ check::cmd jq unsquashfs tar flatpak-builder python3 curl
 snap_name="$1"
 snap_url=https://search.apps.ubuntu.com/api/v1/package/${snap_name}
 
+appid=com.snap2flatpak.${snap_name}
+
 pkg=snap2flatpak.snap
 
 if [[ ! -f "$pkg" ]]; then
@@ -52,15 +54,23 @@ if [[ ! -d "$sqfs" ]]; then
         echo 'unset LIBGL_DRIVERS_PATH; unset LIBVA_DRIVERS_PATH; exec "$@"' >> "$sqfs"/desktop-common.sh
         chmod +x "$sqfs"/desktop-common.sh
     fi
+
+    # cp .desktop files
+    mkdir -p "$sqfs"/icons/hicolor/512xx512/apps/
+    mkdir "$sqfs"/applications/
+    find "$sqfs" -name '*.desktop' | while read -r i; do
+        sed 's|Exec=.*$|Exec=snap2flatpak.sh|;s|..SNAP..|/app/share/|' < "$i" > "$sqfs"/applications/"${appid}.${i##*/}";
+        cp "$sqfs"/meta/gui/icon.png "$sqfs"/icons/hicolor/512xx512/apps/"${appid}.${i##*/}".png
+    done
+    cp "$sqfs"/meta/gui/icon.png "$sqfs"/icons/hicolor/512xx512/apps/"${appid}".png
 fi
+
 if [[ ! -f "fs.tar" ]]; then
     tar cf "fs.tar" "$sqfs"
 fi
 
 meta=$(json::from_yaml "${sqfs}"/meta/snap.yaml)
 command=$(printf '%s' "$meta" | jq -r .apps."${snap_name}".command)
-
-appid=com.snap2flatpak.${snap_name}
 
 cat > init.sh <<-EOF
 
@@ -96,6 +106,21 @@ echo LIBVA_DRIVERS_PATH=\$LIBVA_DRIVERS_PATH
 exec "\${SNAP}/"${command} "\${@}"
 EOF
 
+
+# cat > "${appid}.appdata.xml" <<EOF
+# <?xml version="1.0" encoding="UTF-8"?>
+# <component type="desktop">
+#   <id>${appid}</id>
+#   <name>${snap_name}</name>
+#   <launchable type="desktop-id">${appid}.desktop</launchable>
+#   <provides>
+#     <binary>${appid}</binary>
+#   </provides>
+# </component>
+# EOF
+
+
+# "desktop-file-name-suffix" : " 🏳️‍⚧️",
 
 cat > "${appid}.json" <<EOF
 {
