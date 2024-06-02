@@ -56,14 +56,14 @@ if [[ ! -d "$sqfs" ]]; then
     fi
 
     # cp .desktop files
-    mkdir -p "$sqfs"/icons/hicolor/512xx512/apps/
+    mkdir -p "$sqfs"/icons/hicolor/512x512/apps/
     mkdir "$sqfs"/applications/
     find "$sqfs" -name '*.desktop' | while read -r i; do
         exportname="${appid}.${i##*/}"
         sed 's|Exec=.*$|Exec=snap2flatpak.sh|;s|Icon=.*$|Icon='"${exportname}|" < "$i" > "$sqfs"/applications/"$exportname";
-        cp "$sqfs"/meta/gui/icon.png "$sqfs"/icons/hicolor/512xx512/apps/"$exportname".png
+        cp "$sqfs"/meta/gui/icon.png "$sqfs"/icons/hicolor/512x512/apps/"$exportname".png
     done
-    cp "$sqfs"/meta/gui/icon.png "$sqfs"/icons/hicolor/512xx512/apps/"${appid}".png
+    cp "$sqfs"/meta/gui/icon.png "$sqfs"/icons/hicolor/512x512/apps/"${appid}".png
 fi
 
 if [[ ! -f "fs.tar" ]]; then
